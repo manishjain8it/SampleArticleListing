@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">SampleArticleListing</string>
+    <string name="app_name">ArticleListing</string>
+    <string name="no_articles_found">No articles found</string>
 </resources>
