@@ -8,4 +8,8 @@ class ArticleDataSourceRemote(private val apiService: ApiService) : ArticleDataS
     override fun getArticlesByPage(page: Int, perPage: Int): Single<List<ArticleItem>> {
         return apiService.getArticleListByPaging(page = page.toString(), limit = perPage.toString())
     }
+
+    override fun saveAllArticles(articles: List<ArticleItem>): Single<List<ArticleItem>> {
+        TODO("Not yet implemented")
+    }
 }

@@ -78,6 +78,11 @@ class ArticleListActivity : AppCompatActivity() {
                     //Handle Error
                     progressbar.visibility = View.GONE
                     Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+
+                    // only when adapter is empty, then show no articles found
+                    if (articleListAdapter?.itemCount == 0) {
+                        showArticles(arrayListOf())
+                    }
                 }
             }
         })
