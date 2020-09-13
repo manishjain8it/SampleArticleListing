@@ -37,4 +37,6 @@ class ArticleListViewModel @ViewModelInject constructor(
             })
         addDisposable(disposable)
     }
+
+    fun getArticleList() = articleList
 }

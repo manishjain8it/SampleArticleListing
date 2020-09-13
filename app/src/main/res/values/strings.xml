@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">ArticleListing</string>
     <string name="no_articles_found">No articles found</string>
+    <string name="show_name">%s %s</string>
+    <string name="show_like">%s Likes</string>
+    <string name="show_comments">%s Comments</string>
 </resources>
