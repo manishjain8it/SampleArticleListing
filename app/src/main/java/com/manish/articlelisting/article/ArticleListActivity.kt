@@ -3,6 +3,7 @@ package com.manish.articlelisting.article
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.manish.articlelisting.R
 import com.manish.articlelisting.article.model.ArticleItem
 import com.manish.articlelisting.article.adapter.ArticleListAdapter
+import com.manish.articlelisting.util.Status
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_article_list.*
 
@@ -62,8 +64,21 @@ class ArticleListActivity : AppCompatActivity() {
     private fun initialiseObservers() {
         viewModel.getArticleList().observe(this, {
             removeNullIfAdded()
-            it?.let { list->
-                showArticles(list as ArrayList<ArticleItem>)
+            when (it.status) {
+                Status.SUCCESS -> {
+                    progressbar.visibility = View.GONE
+                    it.data?.let { list ->
+                        showArticles(list as ArrayList<ArticleItem>)
+                    }
+                }
+                Status.LOADING -> {
+                    progressbar.visibility = View.VISIBLE
+                }
+                Status.ERROR -> {
+                    //Handle Error
+                    progressbar.visibility = View.GONE
+                    Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }
