@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import com.manish.articlelisting.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ArticleListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleListViewModel
