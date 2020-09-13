@@ -15,6 +15,7 @@ class ArticleListViewModel @ViewModelInject constructor(
     private val articleList = MutableLiveData<List<ArticleItem>>()
     private var currentPage: Int = Constants.DEFAULT_PAGE
     private val pageLimit: Int = Constants.DEFAULT_PAGE_SIZE
+    private val totalPages: Int = Constants.TOTAL_PAGE_SIZE
 
     companion object {
         private val TAG = "ArticleListViewModel"
@@ -36,6 +37,16 @@ class ArticleListViewModel @ViewModelInject constructor(
                 Log.d(TAG, "On Error Called")
             })
         addDisposable(disposable)
+    }
+
+    fun loadMoreArticles() {
+        Log.d(TAG, "loadMoreArticles, currentPage $currentPage")
+        if (currentPage < totalPages) {
+            currentPage += 1
+            fetchArticles()
+        } else if (currentPage == totalPages) {
+            articleList.postValue(null)
+        }
     }
 
     fun getArticleList() = articleList

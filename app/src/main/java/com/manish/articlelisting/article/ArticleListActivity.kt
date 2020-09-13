@@ -6,6 +6,7 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.manish.articlelisting.R
 import com.manish.articlelisting.article.model.ArticleItem
 import com.manish.articlelisting.article.adapter.ArticleListAdapter
@@ -17,6 +18,7 @@ class ArticleListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleListViewModel
     private var articleListAdapter: ArticleListAdapter? = null
+    var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +27,23 @@ class ArticleListActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this).get(ArticleListViewModel::class.java)
         initialiseRecyclerView()
         initialiseObservers()
+
+        rvArticles.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val linearLayoutManager: LinearLayoutManager? =
+                    recyclerView.layoutManager as? LinearLayoutManager
+                if (!isLoading) {
+                    linearLayoutManager?.run {
+                        if (this.findLastCompletelyVisibleItemPosition() == articleListAdapter?.itemCount!! - 1) {
+                            articleListAdapter?.addNullData()
+                            viewModel.loadMoreArticles()
+                            isLoading = true
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun initialiseRecyclerView() {
@@ -42,6 +61,7 @@ class ArticleListActivity : AppCompatActivity() {
 
     private fun initialiseObservers() {
         viewModel.getArticleList().observe(this, {
+            removeNullIfAdded()
             it?.let { list->
                 showArticles(list as ArrayList<ArticleItem>)
             }
@@ -61,5 +81,10 @@ class ArticleListActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun removeNullIfAdded() {
+        articleListAdapter?.removeNull()
+        isLoading = false
     }
 }
