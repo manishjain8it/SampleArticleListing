@@ -1,7 +1,12 @@
 package com.manish.articlelisting.di
 
 import com.manish.articlelisting.BuildConfig
+import com.manish.articlelisting.article.datasource.ArticleDataSourceRemote
 import com.manish.articlelisting.common.Constants
+import com.manish.articlelisting.repository.ApiService
+import com.manish.articlelisting.repository.ArticleRepository
+import com.manish.articlelisting.repository.ArticleRepositoryManager
+import com.manish.articleslistingsample.article.usecase.GetArticleListUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,5 +45,23 @@ object AppModule {
             .baseUrl(Constants.BASE_URL)
             .client(okHttpClient)
             .build()
+
+    @Provides
+    @Singleton
+    fun provideApiService(retrofit: Retrofit): ApiService = retrofit.create(ApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideArticleDataSourceRemote(apiService: ApiService)= ArticleDataSourceRemote(apiService)
+
+    @Provides
+    @Singleton
+    fun provideArticleRepository(articleDataSourceRemote: ArticleDataSourceRemote): ArticleRepository {
+        return ArticleRepositoryManager(articleDataSourceRemote)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetArticleListUseCase(articleRepository: ArticleRepository)= GetArticleListUseCase(articleRepository)
 
 }
