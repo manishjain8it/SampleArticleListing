@@ -70,4 +70,16 @@ class ArticleListAdapter(private var articles: ArrayList<ArticleItem?>) : Recycl
         articleList?.run { articles.addAll(this) }
         notifyDataSetChanged()
     }
+
+    fun addNullData() {
+        articles.add(null)
+        notifyItemInserted(articles.size - 1)
+    }
+
+    fun removeNull() {
+        if(articles.isNotEmpty() && getItemViewType(articles.size - 1) == VIEW_TYPE_LOADING) {
+            articles.removeAt(articles.size - 1)
+            notifyItemRemoved(articles.size)
+        }
+    }
 }

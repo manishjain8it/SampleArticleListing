@@ -3,12 +3,15 @@ package com.manish.articlelisting.article
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.manish.articlelisting.R
 import com.manish.articlelisting.article.model.ArticleItem
 import com.manish.articlelisting.article.adapter.ArticleListAdapter
+import com.manish.articlelisting.util.Status
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_article_list.*
 
@@ -17,6 +20,7 @@ class ArticleListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleListViewModel
     private var articleListAdapter: ArticleListAdapter? = null
+    var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +29,23 @@ class ArticleListActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this).get(ArticleListViewModel::class.java)
         initialiseRecyclerView()
         initialiseObservers()
+
+        rvArticles.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val linearLayoutManager: LinearLayoutManager? =
+                    recyclerView.layoutManager as? LinearLayoutManager
+                if (!isLoading) {
+                    linearLayoutManager?.run {
+                        if (this.findLastCompletelyVisibleItemPosition() == articleListAdapter?.itemCount!! - 1) {
+                            articleListAdapter?.addNullData()
+                            viewModel.loadMoreArticles()
+                            isLoading = true
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun initialiseRecyclerView() {
@@ -42,8 +63,22 @@ class ArticleListActivity : AppCompatActivity() {
 
     private fun initialiseObservers() {
         viewModel.getArticleList().observe(this, {
-            it?.let { list->
-                showArticles(list as ArrayList<ArticleItem>)
+            removeNullIfAdded()
+            when (it.status) {
+                Status.SUCCESS -> {
+                    progressbar.visibility = View.GONE
+                    it.data?.let { list ->
+                        showArticles(list as ArrayList<ArticleItem>)
+                    }
+                }
+                Status.LOADING -> {
+                    progressbar.visibility = View.VISIBLE
+                }
+                Status.ERROR -> {
+                    //Handle Error
+                    progressbar.visibility = View.GONE
+                    Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }
@@ -61,5 +96,10 @@ class ArticleListActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun removeNullIfAdded() {
+        articleListAdapter?.removeNull()
+        isLoading = false
     }
 }
