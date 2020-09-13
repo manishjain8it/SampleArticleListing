@@ -1,16 +1,21 @@
 package com.manish.articlelisting.di
 
+import android.content.Context
 import com.manish.articlelisting.BuildConfig
+import com.manish.articlelisting.article.datasource.ArticleDataSourceLocal
 import com.manish.articlelisting.article.datasource.ArticleDataSourceRemote
 import com.manish.articlelisting.common.Constants
+import com.manish.articlelisting.db.article.ArticleDao
 import com.manish.articlelisting.repository.ApiService
 import com.manish.articlelisting.repository.ArticleRepository
 import com.manish.articlelisting.repository.ArticleRepositoryManager
+import com.manish.articlelisting.util.NetworkHelper
 import com.manish.articleslistingsample.article.usecase.GetArticleListUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -56,12 +61,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideArticleRepository(articleDataSourceRemote: ArticleDataSourceRemote): ArticleRepository {
-        return ArticleRepositoryManager(articleDataSourceRemote)
+    fun provideArticleDataSourceLocal(articleDao: ArticleDao) = ArticleDataSourceLocal(articleDao)
+
+    @Provides
+    @Singleton
+    fun provideArticleRepository(articleDataSourceRemote: ArticleDataSourceRemote,
+                                 articleDataSourceLocal: ArticleDataSourceLocal, networkHelper: NetworkHelper
+    ): ArticleRepository {
+        return ArticleRepositoryManager(articleDataSourceLocal, articleDataSourceRemote, networkHelper)
     }
 
     @Provides
     @Singleton
     fun provideGetArticleListUseCase(articleRepository: ArticleRepository)= GetArticleListUseCase(articleRepository)
+
+    @Provides
+    @Singleton
+    fun provideNetworkHelper(@ApplicationContext context: Context) = NetworkHelper(context)
 
 }

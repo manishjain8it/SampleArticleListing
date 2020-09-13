@@ -5,4 +5,5 @@ object Constants {
     const val DEFAULT_PAGE = 1
     const val DEFAULT_PAGE_SIZE = 10
     const val TOTAL_PAGE_SIZE = 5
+    const val NO_INTERNET = "No Internet Connection"
 }

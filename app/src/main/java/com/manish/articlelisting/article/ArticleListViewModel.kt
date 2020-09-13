@@ -6,12 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import com.manish.articlelisting.article.model.ArticleItem
 import com.manish.articlelisting.common.BaseViewModel
 import com.manish.articlelisting.common.Constants
+import com.manish.articlelisting.util.NetworkHelper
 import com.manish.articlelisting.util.Resource
 import com.manish.articleslistingsample.article.usecase.GetArticleListUseCase
 import io.reactivex.schedulers.Schedulers
 
 class ArticleListViewModel @ViewModelInject constructor(
-    private val articleListUseCase: GetArticleListUseCase
+    private val articleListUseCase: GetArticleListUseCase,
+    private val networkHelper: NetworkHelper
 ) : BaseViewModel() {
 
     private val articleList = MutableLiveData<Resource<List<ArticleItem>>>()
@@ -36,7 +38,15 @@ class ArticleListViewModel @ViewModelInject constructor(
             .subscribe({ response ->
                 Log.d(TAG, "On Subscribe Called")
                 Log.d(TAG, "Response count ${response.size}")
-                articleList.postValue(Resource.success(response))
+                if (!networkHelper.isNetworkConnected() && response.isEmpty()) {
+                    if (currentPage > Constants.DEFAULT_PAGE) {
+                        currentPage--
+                    }
+                    Log.d(TAG, "response success, currentPage $currentPage")
+                    articleList.postValue(Resource.error(Constants.NO_INTERNET, null))
+                } else {
+                    articleList.postValue(Resource.success(response))
+                }
 
             }, { error ->
                 Log.d(TAG, "On Error Called")
