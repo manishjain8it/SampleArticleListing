@@ -1,6 +1,5 @@
 package com.manish.articlelisting.article.datasource
 
-import android.util.Log
 import com.manish.articlelisting.article.model.ArticleItem
 import com.manish.articlelisting.article.model.Media
 import com.manish.articlelisting.article.model.User
@@ -13,8 +12,6 @@ import io.reactivex.Single
 class ArticleDataSourceLocal(private val articleDao: ArticleDao) : ArticleDataSource {
     override fun getArticlesByPage(page: Int, perPage: Int): Single<List<ArticleItem>> {
 
-        Log.d("ArticleDataSourceLocal", "page $page ==== perpage $perPage")
-        Log.d("ArticleDataSourceLocal", "getArticlesByPage article count======"+articleDao.getRowCount())
         return articleDao.getArticlesByPage(page, perPage)
             .map { data -> convertToArticleItem(data) }
     }
@@ -24,7 +21,6 @@ class ArticleDataSourceLocal(private val articleDao: ArticleDao) : ArticleDataSo
         for(article in articleEntityList){
             articleDao.upsert(article)
         }
-        Log.d("ArticleDataSourceLocal", "saveAllArticles article count======"+articleDao.getRowCount())
         return Single.just(articles)
     }
 
